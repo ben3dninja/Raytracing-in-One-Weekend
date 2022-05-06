@@ -18,11 +18,7 @@ impl Vec3 {
     }
 
     pub fn zero() -> Self {
-        Self {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-        }
+        Self::new(0.0, 0.0, 0.0)
     }
 
     pub fn length(self) -> f64 {
@@ -38,11 +34,11 @@ impl Vec3 {
     }
 
     pub fn cross(self, other: Vec3) -> Self {
-        Self {
-            x: self.y * other.z - self.z * other.y,
-            y: self.z * other.x - self.x * other.z,
-            z: self.x * other.y - self.y * other.x,
-        }
+        Self::new(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x,
+        )
     }
 
     pub fn unit_vector(self) -> Self {
@@ -66,11 +62,7 @@ impl Add for Vec3 {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Self {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
-            z: self.z + rhs.z,
-        }
+        Self::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
     }
 }
 
@@ -78,11 +70,7 @@ impl Sub for Vec3 {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        Self {
-            x: self.x - rhs.x,
-            y: self.y - rhs.y,
-            z: self.z - rhs.z,
-        }
+        Self::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
 }
 
@@ -90,11 +78,7 @@ impl Mul<f64> for Vec3 {
     type Output = Self;
 
     fn mul(self, rhs: f64) -> Self::Output {
-        Self {
-            x: self.x * rhs,
-            y: self.y * rhs,
-            z: self.z * rhs,
-        }
+        Self::new(self.x * rhs, self.y * rhs, self.z * rhs)
     }
 }
 
@@ -110,11 +94,7 @@ impl Div<f64> for Vec3 {
     type Output = Self;
 
     fn div(self, rhs: f64) -> Self::Output {
-        Self {
-            x: self.x / rhs,
-            y: self.y / rhs,
-            z: self.z / rhs,
-        }
+        Self::new(self.x / rhs, self.y / rhs, self.z / rhs)
     }
 }
 
@@ -143,41 +123,26 @@ impl Color {
     }
 }
 
-#[macro_export]
-macro_rules! v3 {
-    ($x:expr, $y:expr, $z:expr) => {
-        crate::vec3::Vec3::new($x, $y, $z)
-    };
-}
-
 #[cfg(test)]
 mod vec3_tests {
     use super::Vec3;
 
     #[test]
     fn new() {
-        let vec = Vec3::new(0.0, 1.0, 2.0);
         assert_eq!(
             Vec3 {
                 x: 0.0,
                 y: 1.0,
                 z: 2.0
             },
-            vec
+            Vec3::new(0.0, 1.0, 2.0)
         );
     }
 
     #[test]
     fn zero() {
         let zero = Vec3::zero();
-        assert_eq!(
-            Vec3 {
-                x: 0.0,
-                y: 0.0,
-                z: 0.0
-            },
-            zero
-        );
+        assert_eq!(Vec3::new(0.0, 0.0, 0.0), zero);
     }
 
     #[test]
@@ -196,54 +161,26 @@ mod vec3_tests {
     fn add_2_vec() {
         let vec1 = Vec3::new(1.0, 2.0, 3.0);
         let vec2 = Vec3::new(2.0, 4.0, 6.0);
-        assert_eq!(
-            Vec3 {
-                x: 3.0,
-                y: 6.0,
-                z: 9.0
-            },
-            vec1 + vec2
-        );
+        assert_eq!(Vec3::new(3.0, 6.0, 9.0,), vec1 + vec2);
     }
 
     #[test]
     fn sub_2_vec() {
         let vec1 = Vec3::new(2.0, 4.0, 6.0);
         let vec2 = Vec3::new(1.0, 2.0, 3.0);
-        assert_eq!(
-            Vec3 {
-                x: 1.0,
-                y: 2.0,
-                z: 3.0
-            },
-            vec1 - vec2
-        );
+        assert_eq!(Vec3::new(1.0, 2.0, 3.0), vec1 - vec2);
     }
 
     #[test]
     fn mul_cst() {
         let vec1 = Vec3::new(1.0, 2.0, 3.0);
-        assert_eq!(
-            Vec3 {
-                x: 2.0,
-                y: 4.0,
-                z: 6.0,
-            },
-            vec1 * 2.0
-        );
+        assert_eq!(Vec3::new(2.0, 4.0, 6.0,), vec1 * 2.0);
     }
 
     #[test]
     fn div_cst() {
         let vec1 = Vec3::new(2.0, 4.0, 6.0);
-        assert_eq!(
-            Vec3 {
-                x: 1.0,
-                y: 2.0,
-                z: 3.0,
-            },
-            vec1 / 2.0
-        );
+        assert_eq!(Vec3::new(1.0, 2.0, 3.0,), vec1 / 2.0);
     }
 
     #[test]
@@ -257,25 +194,18 @@ mod vec3_tests {
     fn cross() {
         let vec1 = Vec3::new(1.0, 2.0, 3.0);
         let vec2 = Vec3::new(2.0, 3.0, 4.0);
-        assert_eq!(
-            Vec3 {
-                x: -1.0,
-                y: 2.0,
-                z: -1.0,
-            },
-            vec1.cross(vec2)
-        )
+        assert_eq!(Vec3::new(-1.0, 2.0, -1.0,), vec1.cross(vec2))
     }
 
     #[test]
     fn unit_vector() {
         let vec = Vec3::new(1.0, 2.0, 3.0);
         assert_eq!(
-            Vec3 {
-                x: 1.0 / (14 as f64).sqrt(),
-                y: 2.0 / (14 as f64).sqrt(),
-                z: 3.0 / (14 as f64).sqrt(),
-            },
+            Vec3::new(
+                1.0 / (14 as f64).sqrt(),
+                2.0 / (14 as f64).sqrt(),
+                3.0 / (14 as f64).sqrt(),
+            ),
             vec.unit_vector()
         )
     }
