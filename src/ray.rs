@@ -9,7 +9,7 @@ pub struct Ray {
 
 #[allow(dead_code)]
 impl Ray {
-    fn new(origin: Point3, direction: Vec3) -> Self {
+    pub const fn new(origin: Point3, direction: Vec3) -> Self {
         Ray { origin, direction }
     }
 
@@ -17,7 +17,7 @@ impl Ray {
     This function takes the parameter of the line's parametric equation and returns the
     corresponding point on the line.
     */
-    fn at(self, t: f64) -> Point3 {
+    pub fn at(self, t: f64) -> Point3 {
         self.origin + self.direction * t
     }
 }
