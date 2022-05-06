@@ -1,7 +1,7 @@
 use std::io::Write;
 use std::time;
 
-use rt_weekend::vec3::{Color};
+use rt_weekend::vec3::Color;
 
 fn main() {
     const IMAGE_WIDTH: u32 = 256;
@@ -20,7 +20,7 @@ fn main() {
             let pixel_color = Color::new(
                 i as f64 / (IMAGE_WIDTH - 1) as f64,
                 j as f64 / (IMAGE_WIDTH - 1) as f64,
-                0.25
+                0.25,
             );
             pixel_color.write_color();
         }
