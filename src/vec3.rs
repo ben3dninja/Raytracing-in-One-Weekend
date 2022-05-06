@@ -127,6 +127,13 @@ impl Color {
     }
 }
 
+#[macro_export]
+macro_rules! vec3 {
+    ($x:expr, $y:expr, $z:expr) => {
+        super::Vec3::new($x, $y, $z)
+    };
+}
+
 #[cfg(test)]
 mod vec3_tests {
     use super::Vec3;
