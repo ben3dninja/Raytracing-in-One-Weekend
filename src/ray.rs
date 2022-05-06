@@ -3,8 +3,8 @@ use crate::vec3::{Point3, Vec3};
 #[allow(dead_code)]
 #[derive(Clone, Copy, Debug)]
 pub struct Ray {
-    origin: Point3,
-    direction: Vec3,
+    pub origin: Point3,
+    pub direction: Vec3,
 }
 
 #[allow(dead_code)]
