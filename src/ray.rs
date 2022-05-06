@@ -31,24 +31,24 @@ impl PartialEq for Ray {
 #[cfg(test)]
 mod tests {
     use super::Ray;
-    use crate::vec3;
+    use crate::vec3::{Point3, Vec3};
 
     #[test]
     fn new() {
         assert_eq!(
             Ray {
-                origin: vec3!(1.0, 2.0, 3.0),
-                direction: vec3!(2.0, 3.0, 4.0)
+                origin: Point3::new(1.0, 2.0, 3.0),
+                direction: Vec3::new(2.0, 3.0, 4.0)
             },
-            Ray::new(vec3!(1.0, 2.0, 3.0), vec3!(2.0, 3.0, 4.0))
+            Ray::new(Point3::new(1.0, 2.0, 3.0), Vec3::new(2.0, 3.0, 4.0))
         )
     }
 
     #[test]
     fn at() {
         assert_eq!(
-            vec3!(1.0, 1.0, 1.0),
-            Ray::new(vec3!(1.0, 1.0, 0.0), vec3!(0.0, 0.0, 1.0)).at(1.0)
+            Point3::new(1.0, 1.0, 1.0),
+            Ray::new(Point3::new(1.0, 1.0, 0.0), Vec3::new(0.0, 0.0, 1.0)).at(1.0)
         )
     }
 }
