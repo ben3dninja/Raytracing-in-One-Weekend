@@ -144,9 +144,9 @@ impl Color {
 }
 
 #[macro_export]
-macro_rules! vec3 {
+macro_rules! v3 {
     ($x:expr, $y:expr, $z:expr) => {
-        super::Vec3::new($x, $y, $z)
+        crate::vec3::Vec3::new($x, $y, $z)
     };
 }
 
