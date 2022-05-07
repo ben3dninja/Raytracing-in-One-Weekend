@@ -63,6 +63,8 @@ impl_op_ex_commutative!(*|a: &Vec3, b: f64| -> Vec3 { Vec3::new(a.x * b, a.y * b
 
 impl_op_ex_commutative!(/ |a: &Vec3, b: f64| -> Vec3 { Vec3::new(a.x / b, a.y / b, a.z / b) });
 
+impl_op_ex!(-|a: &Vec3| -> Vec3 { Vec3::zero() - a });
+
 #[allow(dead_code)]
 pub type Point3 = Vec3;
 #[allow(dead_code)]
@@ -81,7 +83,7 @@ impl Color {
 }
 
 #[cfg(test)]
-mod vec3_tests {
+mod tests {
     use super::Vec3;
 
     #[test]
@@ -130,14 +132,20 @@ mod vec3_tests {
 
     #[test]
     fn mul_cst() {
-        let vec1 = Vec3::new(1.0, 2.0, 3.0);
-        assert_eq!(Vec3::new(2.0, 4.0, 6.0,), vec1 * 2.0);
+        let vec = Vec3::new(1.0, 2.0, 3.0);
+        assert_eq!(Vec3::new(2.0, 4.0, 6.0,), vec * 2.0);
     }
 
     #[test]
     fn div_cst() {
-        let vec1 = Vec3::new(2.0, 4.0, 6.0);
-        assert_eq!(Vec3::new(1.0, 2.0, 3.0,), vec1 / 2.0);
+        let vec = Vec3::new(2.0, 4.0, 6.0);
+        assert_eq!(Vec3::new(1.0, 2.0, 3.0,), vec / 2.0);
+    }
+
+    #[test]
+    fn unary_minus() {
+        let vec = Vec3::new(1.0, 2.0, 3.0);
+        assert_eq!(Vec3::new(-1.0, -2.0, -3.0), -vec);
     }
 
     #[test]
