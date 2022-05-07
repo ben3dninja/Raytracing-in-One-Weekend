@@ -21,7 +21,7 @@ fn main() {
     const VERTICAL: Vec3 = Vec3::new(0.0, VIEWPORT_WIDTH, 0.0);
 
     let lower_left_corner: Point3 =
-        ORIGIN - HORIZONTAL / 2.0 - VERTICAL / 2.0 - Vec3::new(0.0, 0.0, FOCAL_LENGTH);
+        &ORIGIN - &HORIZONTAL / 2.0 - &VERTICAL / 2.0 - Vec3::new(0.0, 0.0, FOCAL_LENGTH);
 
     // Rendering image
 
@@ -37,8 +37,8 @@ fn main() {
             let u = i as f64 / (IMAGE_WIDTH - 1) as f64;
             let v = j as f64 / (IMAGE_HEIGHT - 1) as f64;
             let ray = Ray::new(
-                ORIGIN,
-                lower_left_corner + u * HORIZONTAL + v * VERTICAL - ORIGIN,
+                ORIGIN.clone(),
+                lower_left_corner.clone() + u * &HORIZONTAL + v * &VERTICAL - &ORIGIN,
             );
             let pixel_color = ray_color(ray);
             pixel_color.write_color();
