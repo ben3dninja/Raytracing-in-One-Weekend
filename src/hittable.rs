@@ -10,6 +10,28 @@ pub struct HitRecord {
     pub normal: Vec3,
     // The ray's t parameter, the point's antecendent
     pub t: f64,
+    // The normal's orientation
+    pub front_face: bool,
+}
+
+impl HitRecord {
+    pub fn empty() -> Self {
+        HitRecord {
+            point: Point3::zero(),
+            normal: Vec3::zero(),
+            t: 0.0,
+            front_face: false,
+        }
+    }
+
+    pub fn set_face_normal(&mut self, ray: &Ray, outward_normal: &Vec3) {
+        self.front_face = ray.direction.dot(outward_normal) < 0.0;
+        self.normal = if self.front_face {
+            outward_normal.clone()
+        } else {
+            (-outward_normal).clone()
+        }
+    }
 }
 
 #[allow(unused_variables)]
