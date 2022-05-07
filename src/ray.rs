@@ -1,7 +1,7 @@
 use crate::vec3::{Point3, Vec3};
 
 #[allow(dead_code)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct Ray {
     pub origin: Point3,
     pub direction: Vec3,
@@ -14,11 +14,13 @@ impl Ray {
     }
 
     /**
-    This function takes the parameter of the line's parametric equation and returns the
+    This function takes the t parameter of the line's parametric equation and returns the
     corresponding point on the line.
     */
-    pub fn at(self, t: f64) -> Point3 {
-        self.origin + self.direction * t
+    pub fn at(&self, t: f64) -> Point3 {
+        let point = self.origin.clone();
+        let advancement = self.direction.clone();
+        point + t*advancement
     }
 }
 
