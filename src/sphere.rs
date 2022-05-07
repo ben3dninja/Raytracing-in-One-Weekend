@@ -18,32 +18,38 @@ impl Sphere {
 
 impl Hittable for Sphere {
     fn hit(&self, ray: Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+
+        // Solving the quadratic equation to determine the intersection points
+        // between the ray and the sphere
         let oc = &ray.origin - &self.center;
         let a = (&ray.direction).length_squared();
         let half_b = oc.dot(&ray.direction);
         let c = oc.length_squared() - self.radius * self.radius;
 
-        let discriminant = half_b * half_b - a * c;
-        if discriminant < 0.0 {
+        // The coefficients simplify themselves so the formula is shorter
+        let delta = half_b * half_b - a * c;
+
+        // If delta is negative, there are no roots, so the ray doesn't hit the sphere
+        if delta < 0.0 {
             return None;
         }
-        let sqrtd = discriminant.sqrt();
+        let sqrtd = delta.sqrt();
 
+        // We first calculate the smaller root, closest to camera (if camera is at origin)
         let mut root = (-half_b - sqrtd) / a;
+
+        // If the first root isn't in the bounds, calculate the second. If it isn't either,
+        // return None
         if root < t_min || t_max < root {
             root = (-half_b + sqrtd) / a;
             if root < t_min || t_max < root {
                 return None;
             }
         }
-        let mut record = HitRecord {
-            t: root,
-            point: ray.at(root),
-            ..HitRecord::empty()
-        };
-        let outward_normal = (&record.point - &self.center) / self.radius;
-        record.set_face_normal(&ray, &outward_normal);
-        Some(record)
+
+        let outward_normal = (&ray.at(root) - &self.center) / self.radius;
+
+        Some(HitRecord::new(&ray, root, &outward_normal))
     }
 }
 
@@ -113,6 +119,6 @@ mod tests {
             ..ray
         };
         let record = sphere.hit(ray, -1.0, 0.0).unwrap();
-        assert!(!record.front_face);
+        assert!(!record.is_front_face);
     }
 }
