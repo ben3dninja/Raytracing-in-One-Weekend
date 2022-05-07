@@ -17,7 +17,7 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: Ray, t_min: f64, t_max: f64, record: &mut HitRecord) -> bool {
+    fn hit(&self, ray: Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let oc = &ray.origin - &self.center;
         let a = (&ray.direction).length_squared();
         let half_b = oc.dot(&ray.direction);
@@ -25,7 +25,7 @@ impl Hittable for Sphere {
 
         let discriminant = half_b * half_b - a * c;
         if discriminant < 0.0 {
-            return false;
+            return None;
         }
         let sqrtd = discriminant.sqrt();
 
@@ -33,14 +33,17 @@ impl Hittable for Sphere {
         if root < t_min || t_max < root {
             root = (-half_b + sqrtd) / a;
             if root < t_min || t_max < root {
-                return false;
+                return None;
             }
         }
-        record.t = root;
-        record.point = ray.at(record.t);
+        let mut record = HitRecord {
+            t: root,
+            point: ray.at(root),
+            ..HitRecord::empty()
+        };
         let outward_normal = (&record.point - &self.center) / self.radius;
         record.set_face_normal(&ray, &outward_normal);
-        true
+        Some(record)
     }
 }
 
@@ -53,7 +56,7 @@ impl PartialEq for Sphere {
 #[cfg(test)]
 mod tests {
     use crate::{
-        hittable::{HitRecord, Hittable},
+        hittable::Hittable,
         ray::Ray,
         vec3::{Point3, Vec3},
     };
@@ -81,7 +84,7 @@ mod tests {
     #[test]
     fn hit_true_when_hit() {
         let (sphere, ray) = setup_sphere_and_ray();
-        assert!(sphere.hit(ray, -5.0, 5.0, &mut HitRecord::empty()))
+        assert!(sphere.hit(ray, -5.0, 5.0).is_some())
     }
 
     #[test]
@@ -91,14 +94,13 @@ mod tests {
             origin: Point3::new(0.0, 5.0, 0.0),
             ..ray
         };
-        assert!(!sphere.hit(ray, -5.0, 5.0, &mut HitRecord::empty()))
+        assert!(sphere.hit(ray, -5.0, 5.0).is_none())
     }
 
     #[test]
     fn hit_correct_t_and_point() {
         let (sphere, ray) = setup_sphere_and_ray();
-        let mut record = HitRecord::empty();
-        sphere.hit(ray, -10.0, 10.0, &mut record);
+        let record = sphere.hit(ray, -10.0, 10.0).unwrap();
         assert_eq!(Point3::new(1.0, 0.0, (3 as f64).sqrt()), record.point);
         assert_eq!((3.0 - (3 as f64).sqrt()) / 2.0, record.t);
     }
@@ -110,8 +112,7 @@ mod tests {
             origin: Point3::new(1.0, 0.0, -3.0),
             ..ray
         };
-        let mut record = HitRecord::empty();
-        sphere.hit(ray, -1.0, 0.0, &mut record);
+        let record = sphere.hit(ray, -1.0, 0.0).unwrap();
         assert!(!record.front_face);
     }
 }
