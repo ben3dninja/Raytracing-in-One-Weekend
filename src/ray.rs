@@ -20,7 +20,7 @@ impl Ray {
     pub fn at(&self, t: f64) -> Point3 {
         let point = self.origin.clone();
         let advancement = self.direction.clone();
-        point + t*advancement
+        point + t * advancement
     }
 }
 
