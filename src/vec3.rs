@@ -1,7 +1,4 @@
-use std::{
-    fmt::Display,
-    ops::{Add, Div, Mul, Sub},
-};
+use std::{fmt::Display, ops};
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
@@ -58,53 +55,13 @@ impl PartialEq for Vec3 {
     }
 }
 
-impl Add for Vec3 {
-    type Output = Self;
+impl_op_ex!(+ |a: &Vec3, b: &Vec3| -> Vec3 { Vec3::new(a.x + b.x, a.y + b.y, a.z + b.z) });
 
-    fn add(&self, rhs: &Self) -> Self::Output {
-        Self::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
-    }
-}
+impl_op_ex!(- |a: &Vec3, b: &Vec3| -> Vec3 { Vec3::new(a.x - b.x, a.y - b.y, a.z - b.z) });
 
-impl Sub for Vec3 {
-    type Output = Self;
+impl_op_ex_commutative!(* |a: &Vec3, b: f64| -> Vec3 { Vec3::new(a.x * b, a.y * b, a.z * b) });
 
-    fn sub(&self, rhs: &Self) -> Self::Output {
-        Self::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
-    }
-}
-
-impl Mul<f64> for Vec3 {
-    type Output = Self;
-
-    fn mul(&self, rhs: f64) -> Self::Output {
-        Self::new(self.x * rhs, self.y * rhs, self.z * rhs)
-    }
-}
-
-impl Mul<Vec3> for f64 {
-    type Output = Vec3;
-
-    fn mul(self, rhs: &Vec3) -> Self::Output {
-        rhs * self
-    }
-}
-
-impl Div<f64> for Vec3 {
-    type Output = Self;
-
-    fn div(&self, rhs: f64) -> Self::Output {
-        Self::new(self.x / rhs, self.y / rhs, self.z / rhs)
-    }
-}
-
-impl Div<Vec3> for f64 {
-    type Output = Vec3;
-
-    fn div(self, rhs: &Vec3) -> Self::Output {
-        rhs / self
-    }
-}
+impl_op_ex_commutative!(/ |a: &Vec3, b: f64| -> Vec3 { Vec3::new(a.x / b, a.y / b, a.z / b) });
 
 #[allow(dead_code)]
 pub type Point3 = Vec3;
