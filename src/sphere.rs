@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{
     hittable::{HitRecord, Hittable},
     ray::Ray,
@@ -6,24 +8,34 @@ use crate::{
 
 #[derive(Debug, Clone)]
 pub struct Sphere {
-    center: Point3,
+    center: Rc<Point3>,
     radius: f64,
 }
 
 impl Sphere {
-    pub fn new(center: Point3, radius: f64) -> Self {
+    pub fn new(center: Rc<Point3>, radius: f64) -> Self {
         Self { center, radius }
+    }
+
+    pub fn n(x: f64, y: f64, z: f64, r: f64) -> Self {
+        Self {
+            center: Rc::new(Point3::new(x, y, z)),
+            radius: r,
+        }
+    }
+
+    pub fn ni(x: i32, y: i32, z: i32, r: f64) -> Self {
+        Self::n(x as f64, y as f64, z as f64, r)
     }
 }
 
 impl Hittable for Sphere {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
-
         // Solving the quadratic equation to determine the intersection points
         // between the ray and the sphere
-        let oc = &ray.origin - &self.center;
-        let a = (&ray.direction).length_squared();
-        let half_b = oc.dot(&ray.direction);
+        let oc = Rc::clone(&ray.origin).as_ref() - Rc::clone(&self.center).as_ref();
+        let a = ray.direction.length_squared();
+        let half_b = oc.dot(ray.direction.as_ref());
         let c = oc.length_squared() - self.radius * self.radius;
 
         // The coefficients simplify themselves so the formula is shorter
@@ -47,9 +59,9 @@ impl Hittable for Sphere {
             }
         }
 
-        let outward_normal = (&ray.at(root) - &self.center) / self.radius;
+        let outward_normal = (ray.at(root) - Rc::clone(&self.center).as_ref()) / self.radius;
 
-        Some(HitRecord::new(&ray, root, &outward_normal))
+        Some(HitRecord::new(ray, root, Rc::new(outward_normal)))
     }
 }
 
@@ -61,30 +73,16 @@ impl PartialEq for Sphere {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        hittable::Hittable,
-        ray::Ray,
-        vec3::{Point3, Vec3},
-    };
+    use std::rc::Rc;
+
+    use crate::{hittable::Hittable, ray::Ray, vec3::Point3};
 
     use super::Sphere;
 
     fn setup_sphere_and_ray() -> (Sphere, Ray) {
-        let sphere = Sphere::new(Point3::new(0.0, 0.0, 0.0), 2.0);
-        let ray = Ray::new(Point3::new(1.0, 0.0, 3.0), Vec3::new(0.0, 0.0, -2.0));
+        let sphere = Sphere::ni(0, 0, 0, 2.0);
+        let ray = Ray::ni(0, 0, 3, 0, 0, -2);
         (sphere, ray)
-    }
-
-    #[test]
-    fn new() {
-        let sphere = Sphere::new(Point3::new(0.0, 0.0, 0.0), 2.0);
-        assert_eq!(
-            Sphere {
-                center: Point3::new(0.0, 0.0, 0.0),
-                radius: 2.0
-            },
-            sphere
-        );
     }
 
     #[test]
@@ -97,7 +95,7 @@ mod tests {
     fn hit_false_when_not_hit() {
         let (sphere, ray) = setup_sphere_and_ray();
         let ray = Ray {
-            origin: Point3::new(0.0, 5.0, 0.0),
+            origin: Rc::new(Point3::new(0.0, 5.0, 0.0)),
             ..ray
         };
         assert!(sphere.hit(&ray, -5.0, 5.0).is_none())
@@ -107,7 +105,7 @@ mod tests {
     fn hit_correct_t_and_point() {
         let (sphere, ray) = setup_sphere_and_ray();
         let record = sphere.hit(&ray, -10.0, 10.0).unwrap();
-        assert_eq!(Point3::new(1.0, 0.0, (3 as f64).sqrt()), record.point);
+        assert_eq!(Rc::new(Point3::new(1.0, 0.0, (3 as f64).sqrt())), record.point);
         assert_eq!((3.0 - (3 as f64).sqrt()) / 2.0, record.t);
     }
 
@@ -115,7 +113,7 @@ mod tests {
     fn hit_correct_face() {
         let (sphere, ray) = setup_sphere_and_ray();
         let ray = Ray {
-            origin: Point3::new(1.0, 0.0, -3.0),
+            origin: Rc::new(Point3::ni(1, 0, -3)),
             ..ray
         };
         let record = sphere.hit(&ray, -1.0, 0.0).unwrap();

@@ -3,37 +3,27 @@ use std::io::Write;
 use std::rc::Rc;
 use std::time;
 
+use rand::{thread_rng, Rng};
 use rt_weekend::{
-    hittable_list::HittableList,
-    ray::Ray,
-    sphere::Sphere,
-    vec3::{Color, Point3, Vec3},
+    camera::Camera, hittable_list::HittableList, ray::Ray, sphere::Sphere, vec3::Color,
 };
 
 fn main() {
-    // Image settings
+    // Image and camera settings
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
     const IMAGE_WIDTH: u32 = 400;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
+    const SAMPLES_PER_PIXEL: u32 = 50;
+
+    const FOCAL_LENGTH: f64 = 1.0;
+
+    let cam = Camera::new(ASPECT_RATIO, FOCAL_LENGTH);
 
     // World settings
 
     let mut world = HittableList::empty();
-    world.add(Rc::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
-    world.add(Rc::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
-
-    // Camera settings
-
-    const VIEWPORT_HEIGHT: f64 = 2.0;
-    const VIEWPORT_WIDTH: f64 = ASPECT_RATIO * VIEWPORT_HEIGHT;
-    const FOCAL_LENGTH: f64 = 1.0;
-
-    const ORIGIN: Point3 = Point3::zero();
-    const HORIZONTAL: Vec3 = Vec3::new(VIEWPORT_WIDTH, 0.0, 0.0);
-    const VERTICAL: Vec3 = Vec3::new(0.0, VIEWPORT_HEIGHT, 0.0);
-
-    let lower_left_corner: Point3 =
-        &ORIGIN - &HORIZONTAL / 2.0 - &VERTICAL / 2.0 - Vec3::new(0.0, 0.0, FOCAL_LENGTH);
+    world.add(Rc::new(Sphere::ni(0, 0, -1, 0.5)));
+    world.add(Rc::new(Sphere::n(0.0, -100.5, -1.0, 100.0)));
 
     // Rendering image
 
@@ -46,14 +36,14 @@ fn main() {
     for j in (0..IMAGE_HEIGHT).rev() {
         flush_progress(j, IMAGE_HEIGHT);
         for i in 0..IMAGE_WIDTH {
-            let u = i as f64 / (IMAGE_WIDTH - 1) as f64;
-            let v = j as f64 / (IMAGE_HEIGHT - 1) as f64;
-            let ray = Ray::new(
-                ORIGIN.clone(),
-                lower_left_corner.clone() + u * &HORIZONTAL + v * &VERTICAL - &ORIGIN,
-            );
-            let pixel_color = ray_color(&ray, &world);
-            pixel_color.write_color();
+            let mut color = Color::zero();
+            for _ in 0..SAMPLES_PER_PIXEL {
+                let u = (i as f64 + thread_rng().gen_range(0.0..1.0)) / (IMAGE_WIDTH - 1) as f64;
+                let v = (j as f64 + thread_rng().gen_range(0.0..1.0)) / (IMAGE_HEIGHT - 1) as f64;
+                let ray = cam.shoot_ray(u, v);
+                color = color + ray_color(&ray, &world);
+            }
+            color.write_color(SAMPLES_PER_PIXEL);
         }
     }
 
@@ -72,8 +62,8 @@ fn flush_progress(current_col: u32, total_cols: u32) {
 }
 
 fn ray_color(ray: &Ray, world: &HittableList) -> Color {
-    if let Some(record) = world.hit(ray, 0.0, INFINITY).as_ref() {
-        return 0.5 * (record.normal.clone() + Color::new(1.0, 1.0, 1.0));
+    if let Some(record) = world.trace_ray(ray, 0.0, INFINITY).as_ref() {
+        return 0.5 * (record.normal.as_ref() + Color::new(1.0, 1.0, 1.0));
     }
     let unit_direction = ray.direction.unit_vector();
     let t = 0.5 * (unit_direction.y + 1.0);

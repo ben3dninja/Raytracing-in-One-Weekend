@@ -1,16 +1,31 @@
+use std::rc::Rc;
+
 use crate::vec3::{Point3, Vec3};
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub struct Ray {
-    pub origin: Point3,
-    pub direction: Vec3,
+    pub origin: Rc<Point3>,
+    pub direction: Rc<Vec3>,
 }
 
 #[allow(dead_code)]
 impl Ray {
-    pub const fn new(origin: Point3, direction: Vec3) -> Self {
+    pub const fn new(origin: Rc<Point3>, direction: Rc<Vec3>) -> Self {
         Ray { origin, direction }
+    }
+
+    pub fn n(x: f64, y: f64, z: f64, dx: f64, dy: f64, dz: f64) -> Self {
+        Ray {
+            origin: Rc::new(Point3::new(x, y, z)),
+            direction: Rc::new(Vec3::new(dx, dy, dz)),
+        }
+    }
+
+    pub fn ni(x: i32, y: i32, z: i32, dx: i32, dy: i32, dz: i32) -> Self {
+        Ray::n(
+            x as f64, y as f64, z as f64, dx as f64, dy as f64, dz as f64,
+        )
     }
 
     /**
@@ -18,9 +33,9 @@ impl Ray {
     corresponding point on the line.
     */
     pub fn at(&self, t: f64) -> Point3 {
-        let point = self.origin.clone();
-        let advancement = self.direction.clone();
-        point + t * advancement
+        let point = Rc::clone(&self.origin);
+        let advancement = Rc::clone(&self.direction);
+        point.as_ref() + t * advancement.as_ref()
     }
 }
 
@@ -33,24 +48,13 @@ impl PartialEq for Ray {
 #[cfg(test)]
 mod tests {
     use super::Ray;
-    use crate::vec3::{Point3, Vec3};
-
-    #[test]
-    fn new() {
-        assert_eq!(
-            Ray {
-                origin: Point3::new(1.0, 2.0, 3.0),
-                direction: Vec3::new(2.0, 3.0, 4.0)
-            },
-            Ray::new(Point3::new(1.0, 2.0, 3.0), Vec3::new(2.0, 3.0, 4.0))
-        )
-    }
+    use crate::vec3::Point3;
 
     #[test]
     fn at() {
         assert_eq!(
-            Point3::new(1.0, 1.0, 1.0),
-            Ray::new(Point3::new(1.0, 1.0, 0.0), Vec3::new(0.0, 0.0, 1.0)).at(1.0)
+            Point3::ni(1, 1, 1),
+            Ray::ni(1, 1, 0, 0, 0, 1).at(1.0)
         )
     }
 }

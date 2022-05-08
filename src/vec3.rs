@@ -14,6 +14,10 @@ impl Vec3 {
         Self { x, y, z }
     }
 
+    pub const fn ni(x: i32, y: i32, z: i32) -> Self {
+        Self::new(x as f64, y as f64, z as f64)
+    }
+
     pub const fn zero() -> Self {
         Self::new(0.0, 0.0, 0.0)
     }
@@ -72,12 +76,21 @@ pub type Color = Vec3;
 
 #[allow(dead_code)]
 impl Color {
-    pub fn write_color(self) {
+    pub fn write_color(&self, samples_per_pixel: u32) {
+        let mut r = self.x;
+        let mut g = self.y;
+        let mut b = self.z;
+
+        let scale = 1.0 / samples_per_pixel as f64;
+        r *= scale;
+        g *= scale;
+        b *= scale;
+
         println!(
             "{} {} {}",
-            (255.999 * self.x) as u32,
-            (255.999 * self.y) as u32,
-            (255.999 * self.z) as u32
+            256.0 * r.clamp(0.0, 0.999),
+            256.0 * g.clamp(0.0, 0.999),
+            256.0 * b.clamp(0.0, 0.999)
         )
     }
 }
@@ -85,24 +98,6 @@ impl Color {
 #[cfg(test)]
 mod tests {
     use super::Vec3;
-
-    #[test]
-    fn new() {
-        assert_eq!(
-            Vec3 {
-                x: 0.0,
-                y: 1.0,
-                z: 2.0
-            },
-            Vec3::new(0.0, 1.0, 2.0)
-        );
-    }
-
-    #[test]
-    fn zero() {
-        let zero = Vec3::zero();
-        assert_eq!(Vec3::new(0.0, 0.0, 0.0), zero);
-    }
 
     #[test]
     fn length() {
