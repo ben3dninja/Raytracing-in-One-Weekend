@@ -2,17 +2,23 @@ use std::rc::Rc;
 
 use crate::{hittable::{Hittable, HitRecord}, ray::Ray};
 
-struct HittableList {
+pub struct HittableList {
     objects: Vec<Rc<dyn Hittable>>
 }
 
 #[allow(dead_code)]
 impl HittableList {
-    fn add(&mut self, object: Rc<dyn Hittable>) {
+    pub fn empty() -> Self {
+        Self {
+            objects: Vec::new()
+        }
+    }
+
+    pub fn add(&mut self, object: Rc<dyn Hittable>) {
         self.objects.push(object);
     }
 
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+    pub fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut rec = None;
         let mut closest_so_far = t_max;
 
