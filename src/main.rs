@@ -1,14 +1,26 @@
+use std::f64::INFINITY;
 use std::io::Write;
+use std::rc::Rc;
 use std::time;
 
-use rt_weekend::ray::Ray;
-use rt_weekend::vec3::{Color, Point3, Vec3};
+use rt_weekend::{
+    hittable_list::HittableList,
+    ray::Ray,
+    sphere::Sphere,
+    vec3::{Color, Point3, Vec3},
+};
 
 fn main() {
     // Image settings
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
     const IMAGE_WIDTH: u32 = 400;
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
+
+    // World settings
+
+    let mut world = HittableList::empty();
+    world.add(Rc::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+    world.add(Rc::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
     // Camera settings
 
@@ -18,7 +30,7 @@ fn main() {
 
     const ORIGIN: Point3 = Point3::zero();
     const HORIZONTAL: Vec3 = Vec3::new(VIEWPORT_WIDTH, 0.0, 0.0);
-    const VERTICAL: Vec3 = Vec3::new(0.0, VIEWPORT_WIDTH, 0.0);
+    const VERTICAL: Vec3 = Vec3::new(0.0, VIEWPORT_HEIGHT, 0.0);
 
     let lower_left_corner: Point3 =
         &ORIGIN - &HORIZONTAL / 2.0 - &VERTICAL / 2.0 - Vec3::new(0.0, 0.0, FOCAL_LENGTH);
@@ -40,7 +52,7 @@ fn main() {
                 ORIGIN.clone(),
                 lower_left_corner.clone() + u * &HORIZONTAL + v * &VERTICAL - &ORIGIN,
             );
-            let pixel_color = ray_color(ray);
+            let pixel_color = ray_color(&ray, &world);
             pixel_color.write_color();
         }
     }
@@ -59,7 +71,10 @@ fn flush_progress(current_col: u32, total_cols: u32) {
     handle.flush().expect("Failed to flush progress");
 }
 
-fn ray_color(ray: Ray) -> Color {
+fn ray_color(ray: &Ray, world: &HittableList) -> Color {
+    if let Some(record) = world.hit(ray, 0.0, INFINITY).as_ref() {
+        return 0.5 * (record.normal.clone() + Color::new(1.0, 1.0, 1.0));
+    }
     let unit_direction = ray.direction.unit_vector();
     let t = 0.5 * (unit_direction.y + 1.0);
     (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
