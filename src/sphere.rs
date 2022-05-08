@@ -17,7 +17,7 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
 
         // Solving the quadratic equation to determine the intersection points
         // between the ray and the sphere
@@ -90,7 +90,7 @@ mod tests {
     #[test]
     fn hit_true_when_hit() {
         let (sphere, ray) = setup_sphere_and_ray();
-        assert!(sphere.hit(ray, -5.0, 5.0).is_some())
+        assert!(sphere.hit(&ray, -5.0, 5.0).is_some())
     }
 
     #[test]
@@ -100,13 +100,13 @@ mod tests {
             origin: Point3::new(0.0, 5.0, 0.0),
             ..ray
         };
-        assert!(sphere.hit(ray, -5.0, 5.0).is_none())
+        assert!(sphere.hit(&ray, -5.0, 5.0).is_none())
     }
 
     #[test]
     fn hit_correct_t_and_point() {
         let (sphere, ray) = setup_sphere_and_ray();
-        let record = sphere.hit(ray, -10.0, 10.0).unwrap();
+        let record = sphere.hit(&ray, -10.0, 10.0).unwrap();
         assert_eq!(Point3::new(1.0, 0.0, (3 as f64).sqrt()), record.point);
         assert_eq!((3.0 - (3 as f64).sqrt()) / 2.0, record.t);
     }
@@ -118,7 +118,7 @@ mod tests {
             origin: Point3::new(1.0, 0.0, -3.0),
             ..ray
         };
-        let record = sphere.hit(ray, -1.0, 0.0).unwrap();
+        let record = sphere.hit(&ray, -1.0, 0.0).unwrap();
         assert!(!record.is_front_face);
     }
 }

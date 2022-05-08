@@ -36,7 +36,6 @@ impl HitRecord {
                 (-outward_normal).clone()
             }
         }
-
     }
 }
 
@@ -45,7 +44,7 @@ pub trait Hittable {
     /**
     This function returns a HitRecord if the specified ray actually hit the hittable, and None otherwise.
     */
-    fn hit(&self, ray: Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         None
     }
 }
