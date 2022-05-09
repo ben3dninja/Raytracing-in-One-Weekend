@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     ray::Ray,
     vec3::{Point3, Vec3},
@@ -7,10 +5,10 @@ use crate::{
 
 #[allow(dead_code)]
 pub struct Camera {
-    origin: Rc<Point3>,
-    lower_left_corner: Rc<Point3>,
-    horizontal: Rc<Vec3>,
-    vertical: Rc<Vec3>,
+    origin: Point3,
+    lower_left_corner: Point3,
+    horizontal: Vec3,
+    vertical: Vec3,
 }
 
 #[allow(dead_code)]
@@ -27,22 +25,20 @@ impl Camera {
             &origin - &horizontal / 2.0 - &vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
 
         Self {
-            origin: Rc::new(origin),
-            lower_left_corner: Rc::new(lower_left_corner),
-            horizontal: Rc::new(horizontal),
-            vertical: Rc::new(vertical),
+            origin,
+            lower_left_corner,
+            horizontal,
+            vertical,
         }
     }
 
     pub fn shoot_ray(&self, u: f64, v: f64) -> Ray {
         Ray::new(
-            Rc::clone(&self.origin),
-            Rc::new(
-                self.lower_left_corner.as_ref()
-                    + u * self.horizontal.as_ref()
-                    + v * self.vertical.as_ref()
-                    - self.origin.as_ref(),
-            ),
+            self.origin.clone(),
+            &self.lower_left_corner
+                + u * &self.horizontal
+                + v * &self.vertical
+                - &self.origin
         )
     }
 }

@@ -63,7 +63,7 @@ fn flush_progress(current_col: u32, total_cols: u32) {
 
 fn ray_color(ray: &Ray, world: &HittableList) -> Color {
     if let Some(record) = world.trace_ray(ray, 0.0, INFINITY).as_ref() {
-        return 0.5 * (record.normal.as_ref() + Color::new(1.0, 1.0, 1.0));
+        return 0.5 * (&record.normal + Color::new(1.0, 1.0, 1.0));
     }
     let unit_direction = ray.direction.unit_vector();
     let t = 0.5 * (unit_direction.y + 1.0);
