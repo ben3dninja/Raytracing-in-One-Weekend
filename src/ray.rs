@@ -1,24 +1,22 @@
-use std::rc::Rc;
-
 use crate::vec3::{Point3, Vec3};
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub struct Ray {
-    pub origin: Rc<Point3>,
-    pub direction: Rc<Vec3>,
+    pub origin: Point3,
+    pub direction: Vec3,
 }
 
 #[allow(dead_code)]
 impl Ray {
-    pub const fn new(origin: Rc<Point3>, direction: Rc<Vec3>) -> Self {
+    pub const fn new(origin: Point3, direction: Vec3) -> Self {
         Ray { origin, direction }
     }
 
     pub fn n(x: f64, y: f64, z: f64, dx: f64, dy: f64, dz: f64) -> Self {
         Ray {
-            origin: Rc::new(Point3::new(x, y, z)),
-            direction: Rc::new(Vec3::new(dx, dy, dz)),
+            origin: Point3::new(x, y, z),
+            direction: Vec3::new(dx, dy, dz),
         }
     }
 
@@ -33,9 +31,9 @@ impl Ray {
     corresponding point on the line.
     */
     pub fn at(&self, t: f64) -> Point3 {
-        let point = Rc::clone(&self.origin);
-        let advancement = Rc::clone(&self.direction);
-        point.as_ref() + t * advancement.as_ref()
+        let point = &self.origin;
+        let advancement = &self.direction;
+        point + t * advancement
     }
 }
 
@@ -52,9 +50,6 @@ mod tests {
 
     #[test]
     fn at() {
-        assert_eq!(
-            Point3::ni(1, 1, 1),
-            Ray::ni(1, 1, 0, 0, 0, 1).at(1.0)
-        )
+        assert_eq!(Point3::ni(1, 1, 1), Ray::ni(1, 1, 0, 0, 0, 1).at(1.0))
     }
 }
