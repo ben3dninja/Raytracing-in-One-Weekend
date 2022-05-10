@@ -69,6 +69,14 @@ impl_op_ex_commutative!(/ |a: &Vec3, b: f64| -> Vec3 { Vec3::new(a.x / b, a.y / 
 
 impl_op_ex!(-|a: &Vec3| -> Vec3 { Vec3::zero() - a });
 
+impl_op_ex!(+= |a: &mut Vec3, b: &Vec3| { a.x += b.x; a.y += b.y; a.z += b.z });
+
+impl_op_ex!(-= |a: &mut Vec3, b: &Vec3| { a.x -= b.x; a.y -= b.y; a.z -= b.z });
+
+impl_op_ex!(*= |a: &mut Vec3, b: f64| { a.x *= b; a.y *= b; a.z *= b });
+
+impl_op_ex!(/= |a: &mut Vec3, b: f64| { a.x /= b; a.y /= b; a.z /= b });
+
 #[allow(dead_code)]
 pub type Point3 = Vec3;
 #[allow(dead_code)]
@@ -76,7 +84,7 @@ pub type Color = Vec3;
 
 #[allow(dead_code)]
 impl Color {
-    pub fn write_color(&self, samples_per_pixel: u32) {
+    pub fn average_and_write_color(&self, samples_per_pixel: u32) {
         let mut r = self.x;
         let mut g = self.y;
         let mut b = self.z;
