@@ -31,9 +31,7 @@ impl Ray {
     corresponding point on the line.
     */
     pub fn at(&self, t: f64) -> Point3 {
-        let point = &self.origin;
-        let advancement = &self.direction;
-        point + t * advancement
+        &self.origin + t * &self.direction
     }
 }
 
