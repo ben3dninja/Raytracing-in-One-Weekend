@@ -4,9 +4,7 @@ use std::rc::Rc;
 use std::time;
 
 use rand::{thread_rng, Rng};
-use rt_weekend::{
-    camera::Camera, hittable_list::HittableList, ray::Ray, sphere::Sphere, vec3::Color,
-};
+use rt_weekend::{camera::Camera, ray::Ray, sphere::Sphere, vec3::Color, world::World};
 
 fn main() {
     // Image and camera settings
@@ -21,7 +19,7 @@ fn main() {
 
     // World settings
 
-    let mut world = HittableList::empty();
+    let mut world = World::empty();
     world.add(Rc::new(Sphere::ni(0, 0, -1, 0.5)));
     world.add(Rc::new(Sphere::n(0.0, -100.5, -1.0, 100.0)));
 
@@ -33,17 +31,22 @@ fn main() {
 
     let instant = time::Instant::now();
 
-    for j in (0..IMAGE_HEIGHT).rev() {
-        flush_progress(j, IMAGE_HEIGHT);
-        for i in 0..IMAGE_WIDTH {
-            let mut color = Color::zero();
+    // The origin of the image is the bottom left corner
+    for pixel_y in (0..IMAGE_HEIGHT).rev() {
+        flush_progress(pixel_y, IMAGE_HEIGHT);
+        for pixel_x in 0..IMAGE_WIDTH {
+            let mut color_sum = Color::zero();
             for _ in 0..SAMPLES_PER_PIXEL {
-                let u = (i as f64 + thread_rng().gen_range(0.0..1.0)) / (IMAGE_WIDTH - 1) as f64;
-                let v = (j as f64 + thread_rng().gen_range(0.0..1.0)) / (IMAGE_HEIGHT - 1) as f64;
+                // u and v are the coordinates of the "holes" the rays punch through the viewport, in the
+                // (bottom_left_corner, horizontal, vertical) base
+                let u =
+                    (pixel_x as f64 + thread_rng().gen_range(0.0..1.0)) / (IMAGE_WIDTH - 1) as f64;
+                let v =
+                    (pixel_y as f64 + thread_rng().gen_range(0.0..1.0)) / (IMAGE_HEIGHT - 1) as f64;
                 let ray = cam.shoot_ray(u, v);
-                color = color + ray_color(&ray, &world);
+                color_sum += compute_ray_color(&ray, &world);
             }
-            color.write_color(SAMPLES_PER_PIXEL);
+            color_sum.average_and_write_color(SAMPLES_PER_PIXEL);
         }
     }
 
@@ -61,11 +64,14 @@ fn flush_progress(current_col: u32, total_cols: u32) {
     handle.flush().expect("Failed to flush progress");
 }
 
-fn ray_color(ray: &Ray, world: &HittableList) -> Color {
+fn compute_ray_color(ray: &Ray, world: &World) -> Color {
     if let Some(record) = world.trace_ray(ray, 0.0, INFINITY).as_ref() {
-        return 0.5 * (&record.normal + Color::new(1.0, 1.0, 1.0));
+        // This uses the hit record's normal vector as a base for the color
+        0.5 * (&record.normal + Color::new(1.0, 1.0, 1.0))
+    } else {
+        let unit_direction = ray.direction.unit_vector();
+        let t = 0.5 * (unit_direction.y + 1.0);
+        // This creates a gradient from blue (top) to white (bottom)
+        (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
     }
-    let unit_direction = ray.direction.unit_vector();
-    let t = 0.5 * (unit_direction.y + 1.0);
-    (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
 }
